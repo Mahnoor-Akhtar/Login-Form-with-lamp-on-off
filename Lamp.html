@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Login Form | Lamp Control</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #0a0a0a;
+            overflow: hidden;
+            transition: background 1.5s ease;
+        }
+
+        body.light-off {
+            background: #000;
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 100px;
+        }
+
+        /* Lamp Styles */
+        .lamp-container {
+            position: relative;
+            width: 300px;
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .lamp {
+            position: relative;
+            width: 150px;
+            height: 250px;
+        }
+
+        .lamp-base {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 40px;
+            background: #444;
+            border-radius: 10px 10px 0 0;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            z-index: 3;
+        }
+
+        .lamp-stand {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 15px;
+            height: 180px;
+            background: linear-gradient(to right, #555, #777, #555);
+            z-index: 2;
+        }
+
+        .lamp-head {
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 100px;
+            background: #666;
+            clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
+            z-index: 1;
+            transition: all 0.5s ease;
+        }
+
+        .lamp-head.on {
+            background: #ffdd40;
+            box-shadow: 0 0 50px 30px rgba(255, 221, 64, 0.7),
+                        0 0 100px 60px rgba(255, 221, 64, 0.4);
+        }
+
+        /* Lamp Switch */
+        .lamp-switch {
+            position: relative;
+            margin-top: 30px;
+            width: 80px;
+            height: 40px;
+        }
+
+        .switch-label {
+            position: absolute;
+            top: -25px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: #00eeff;
+            font-size: 14px;
+            text-shadow: 0 0 5px #00eeff;
+            letter-spacing: 1px;
+        }
+
+        .switch {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #222;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+            overflow: hidden;
+        }
+
+        .switch::before {
+            content: '';
+            position: absolute;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #888, #ccc);
+            top: 4px;
+            left: 4px;
+            transition: transform 0.5s ease;
+            z-index: 2;
+        }
+
+        .switch.on::before {
+            transform: translateX(40px);
+            background: linear-gradient(45deg, #ffdd40, #fff);
+            box-shadow: 0 0 15px #ffdd40;
+        }
+
+        .switch::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, #222, #00eeff);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .switch.on::after {
+            opacity: 0.3;
+        }
+
+        /* Login Form */
+        .form-container {
+            position: relative;
+            width: 400px;
+            height: 500px;
+            perspective: 1000px;
+            transition: all 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            opacity: 1;
+            transform: translateX(0) rotateY(0deg);
+        }
+
+        body.light-off .form-container {
+            opacity: 0;
+            transform: translateX(100px) rotateY(90deg);
+        }
+
+        .neon-form {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 20, 0.9);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 0 20px rgba(0, 238, 255, 0.3),
+                        inset 0 0 20px rgba(0, 238, 255, 0.1);
+            border: 2px solid #00eeff;
+            transform-style: preserve-3d;
+            transform: rotateY(-10deg);
+            transition: all 0.8s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .neon-form:hover {
+            transform: rotateY(-5deg) translateY(-10px);
+            box-shadow: 0 0 30px rgba(0, 238, 255, 0.5),
+                        0 10px 40px rgba(0, 238, 255, 0.2),
+                        inset 0 0 20px rgba(0, 238, 255, 0.2);
+        }
+
+        .form-title {
+            text-align: center;
+            color: #00eeff;
+            font-size: 32px;
+            margin-bottom: 40px;
+            text-shadow: 0 0 10px #00eeff;
+            letter-spacing: 2px;
+            position: relative;
+        }
+
+        .form-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: #00eeff;
+            box-shadow: 0 0 10px #00eeff;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 40px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px 20px;
+            background: transparent;
+            border: 2px solid #00aaff;
+            border-radius: 10px;
+            color: #00eeff;
+            font-size: 18px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus {
+            border-color: #00eeff;
+            box-shadow: 0 0 15px #00eeff;
+        }
+
+        .input-group label {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            color: #00aaff;
+            font-size: 18px;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus + label,
+        .input-group input:valid + label {
+            top: -25px;
+            left: 10px;
+            font-size: 14px;
+            color: #00eeff;
+            text-shadow: 0 0 5px #00eeff;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: transparent;
+            border: 2px solid #ff00ff;
+            border-radius: 10px;
+            color: #ff00ff;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 20px;
+            text-shadow: 0 0 5px #ff00ff;
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+        }
+
+        .submit-btn:hover {
+            background: rgba(255, 0, 255, 0.1);
+            box-shadow: 0 0 20px #ff00ff,
+                        inset 0 0 20px rgba(255, 0, 255, 0.2);
+            transform: translateY(-3px);
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #00aaff;
+        }
+
+        .form-footer a {
+            color: #ff00ff;
+            text-decoration: none;
+            text-shadow: 0 0 5px #ff00ff;
+            transition: all 0.3s ease;
+        }
+
+        .form-footer a:hover {
+            color: #00eeff;
+            text-shadow: 0 0 10px #00eeff;
+        }
+
+        /* Neon Glow Effects */
+        .glow {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(40px);
+            opacity: 0.6;
+            z-index: -1;
+        }
+
+        .glow-1 {
+            width: 300px;
+            height: 300px;
+            background: #ff00ff;
+            top: -100px;
+            right: -100px;
+            animation: float 8s infinite ease-in-out;
+        }
+
+        .glow-2 {
+            width: 250px;
+            height: 250px;
+            background: #00eeff;
+            bottom: -80px;
+            left: -80px;
+            animation: float 10s infinite ease-in-out reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .container {
+                flex-direction: column;
+                gap: 50px;
+                padding: 20px;
+            }
+            
+            .form-container {
+                width: 350px;
+                height: 450px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Lamp Section -->
+        <div class="lamp-container">
+            <div class="lamp">
+                <div class="lamp-base"></div>
+                <div class="lamp-stand"></div>
+                <div class="lamp-head"></div>
+            </div>
+            
+            <div class="lamp-switch">
+                <div class="switch-label">LAMP</div>
+                <div class="switch"></div>
+            </div>
+        </div>
+
+        <!-- Login Form -->
+        <div class="form-container">
+            <div class="neon-form">
+                <h2 class="form-title">NEON LOGIN</h2>
+                <form id="loginForm">
+                    <div class="input-group">
+                        <input type="text" id="username" required>
+                        <label for="username"><i class="fas fa-user"></i> Username</label>
+                    </div>
+                    
+                    <div class="input-group">
+                        <input type="password" id="password" required>
+                        <label for="password"><i class="fas fa-lock"></i> Password</label>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                    
+                    <div class="form-footer">
+                        <p>Don't have an account? <a href="#">Sign Up</a></p>
+                        <p><a href="#">Forgot Password?</a></p>
+                    </div>
+                </form>
+                
+                <!-- Glow Effects -->
+                <div class="glow glow-1"></div>
+                <div class="glow glow-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const lampSwitch = document.querySelector('.switch');
+            const lampHead = document.querySelector('.lamp-head');
+            const body = document.body;
+            const formContainer = document.querySelector('.form-container');
+            const neonForm = document.querySelector('.neon-form');
+            
+            // Lamp state
+            let isLampOn = true;
+            
+            // Toggle lamp function
+            function toggleLamp() {
+                isLampOn = !isLampOn;
+                
+                if (isLampOn) {
+                    // Turn lamp ON
+                    lampSwitch.classList.add('on');
+                    lampHead.classList.add('on');
+                    body.classList.remove('light-off');
+                    
+                    // Form animation - appear with 3D effect
+                    formContainer.style.transition = 'all 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+                    formContainer.style.opacity = '1';
+                    formContainer.style.transform = 'translateX(0) rotateY(0deg)';
+                    
+                    // Add glowing effect to form
+                    setTimeout(() => {
+                        neonForm.style.boxShadow = '0 0 30px rgba(0, 238, 255, 0.5), 0 10px 40px rgba(0, 238, 255, 0.2), inset 0 0 20px rgba(0, 238, 255, 0.2)';
+                    }, 800);
+                    
+                } else {
+                    // Turn lamp OFF
+                    lampSwitch.classList.remove('on');
+                    lampHead.classList.remove('on');
+                    body.classList.add('light-off');
+                    
+                    // Form animation - disappear with 3D effect
+                    formContainer.style.transition = 'all 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+                    formContainer.style.opacity = '0';
+                    formContainer.style.transform = 'translateX(100px) rotateY(90deg)';
+                    
+                    // Remove glowing effect from form
+                    neonForm.style.boxShadow = '0 0 20px rgba(0, 238, 255, 0.3), inset 0 0 20px rgba(0, 238, 255, 0.1)';
+                }
+            }
+            
+            // Add click event to lamp switch
+            lampSwitch.addEventListener('click', toggleLamp);
+            
+            // Form submission
+            const loginForm = document.getElementById('loginForm');
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                if (username && password) {
+                    // Add animation to button on successful submission
+                    const submitBtn = document.querySelector('.submit-btn');
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging In...';
+                    submitBtn.style.background = 'rgba(0, 255, 0, 0.1)';
+                    submitBtn.style.borderColor = '#00ff00';
+                    submitBtn.style.color = '#00ff00';
+                    submitBtn.style.boxShadow = '0 0 20px #00ff00';
+                    
+                    // Simulate login process
+                    setTimeout(() => {
+                        submitBtn.innerHTML = '<i class="fas fa-check"></i> Login Successful!';
+                        submitBtn.style.boxShadow = '0 0 30px #00ff00, inset 0 0 20px rgba(0, 255, 0, 0.3)';
+                        
+                        // Reset form after 2 seconds
+                        setTimeout(() => {
+                            loginForm.reset();
+                            submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+                            submitBtn.style.background = 'transparent';
+                            submitBtn.style.borderColor = '#ff00ff';
+                            submitBtn.style.color = '#ff00ff';
+                            submitBtn.style.boxShadow = '0 0 10px rgba(255, 0, 255, 0.3)';
+                        }, 2000);
+                    }, 1500);
+                } else {
+                    // Shake animation for empty fields
+                    const inputs = document.querySelectorAll('.input-group input');
+                    inputs.forEach(input => {
+                        if (!input.value) {
+                            input.style.borderColor = '#ff0000';
+                            input.style.boxShadow = '0 0 15px #ff0000';
+                            input.style.animation = 'shake 0.5s';
+                            
+                            setTimeout(() => {
+                                input.style.borderColor = '#00aaff';
+                                input.style.boxShadow = 'none';
+                                input.style.animation = '';
+                            }, 500);
+                        }
+                    });
+                }
+            });
+            
+            // Add CSS for shake animation
+            const style = document.createElement('style');
+            style.innerHTML = `
+                @keyframes shake {
+                    0%, 100% { transform: translateX(0); }
+                    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+                    20%, 40%, 60%, 80% { transform: translateX(5px); }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Add hover effect to lamp switch
+            lampSwitch.addEventListener('mouseenter', function() {
+                if (!isLampOn) {
+                    this.style.boxShadow = 'inset 0 0 10px rgba(0,0,0,0.8), 0 0 15px rgba(0, 238, 255, 0.5)';
+                } else {
+                    this.style.boxShadow = 'inset 0 0 10px rgba(0,0,0,0.8), 0 0 15px rgba(255, 221, 64, 0.7)';
+                }
+            });
+            
+            lampSwitch.addEventListener('mouseleave', function() {
+                this.style.boxShadow = 'inset 0 0 10px rgba(0,0,0,0.8)';
+            });
+        });
+    </script>
+</body>
+</html>
